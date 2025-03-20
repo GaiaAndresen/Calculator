@@ -101,15 +101,15 @@ func tokensToValue(tokens []Token, start int, end int, priority int) float64 {
 		return number
 	}
 	priorityFound := false
-	for i := start; i < end; i++ {
+	for i := end - 1; i >= start; i-- {
 		token := tokens[i]
 		/*if token.value == "(" { TODO
 			parenthesisTokensToValue(tokens, i, end, priority)
 		}*/
 		if token.ttype == "operation" && token.priority == priority {
 			priorityFound = true
-			leftValue := tokensToValue(tokens, start, i, priority+1)
-			rightValue := tokensToValue(tokens, i+1, end, priority)
+			leftValue := tokensToValue(tokens, start, i, priority)
+			rightValue := tokensToValue(tokens, i+1, end, priority+1)
 			return getResultOfTokenAndValues(leftValue, rightValue, token)
 		}
 	}
