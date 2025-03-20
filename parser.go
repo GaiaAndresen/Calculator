@@ -68,23 +68,24 @@ func getResultOfTokenAndValues(leftvalue float64, rightvalue float64, token Toke
 	}
 }
 
-func parenthesisTokensToValue(tokens []Token, start int, end int, priority int) float64 {
-	if tokens[start].ttype != "parenthesis" {
+func getParOpenIndex(tokens []Token, start int, parenthesisEndIndex int) int {
+	if tokens[parenthesisEndIndex].value != ")" {
+		fmt.Println("Expected ')', but got", tokens[parenthesisEndIndex].value)
 		return 0
 	}
-	for i := end - 1; i > start; i-- {
-		token := tokens[i]
-		if token.value == ")" {
-			parenthesisValue := tokensToValue(tokens, start+1, i-1, 0)
-			if i < end-1 {
-				rightValue := tokensToValue(tokens, i+2, end, priority) //todo fix
-				return getResultOfTokenAndValues(parenthesisValue, rightValue, tokens[i+1])
+	parenthesesAmount := 1
+	for i := parenthesisEndIndex - 1; i >= start; i-- {
+		if tokens[i].ttype == "parenthesis" {
+			if tokens[i].value == ")" {
+				parenthesesAmount++
+			} else {
+				parenthesesAmount--
+				if parenthesesAmount == 0 {
+					return i
+				}
 			}
-			return parenthesisValue
 		}
-
 	}
-	fmt.Println("Error, match not found for parenthesis")
 	return 0
 }
 
@@ -103,9 +104,13 @@ func tokensToValue(tokens []Token, start int, end int, priority int) float64 {
 	priorityFound := false
 	for i := end - 1; i >= start; i-- {
 		token := tokens[i]
-		/*if token.value == "(" { TODO
-			parenthesisTokensToValue(tokens, i, end, priority)
-		}*/
+		if token.value == ")" {
+			j := getParOpenIndex(tokens, start, i)
+			if j == start && i == end-1 {
+				return tokensToValue(tokens, start+1, end-1, 0)
+			}
+			i = j
+		}
 		if token.ttype == "operation" && token.priority == priority {
 			priorityFound = true
 			leftValue := tokensToValue(tokens, start, i, priority)
@@ -116,6 +121,7 @@ func tokensToValue(tokens []Token, start int, end int, priority int) float64 {
 	if !priorityFound {
 		return tokensToValue(tokens, start, end, priority+1)
 	}
+	fmt.Println("Reached bottom of recursion without finding value")
 	return 0
 }
 
