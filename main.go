@@ -15,5 +15,7 @@ func main() {
 		}
 		result := getResult(input)
 		fmt.Println(result)
+		saveCalc(input, result)
+		printHistory()
 	}
 }
