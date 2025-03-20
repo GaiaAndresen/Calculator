@@ -13,7 +13,7 @@ func main() {
 			fmt.Println("Bye")
 			return
 		}
-		parsedInput := getResult(input)
-		fmt.Println(parsedInput)
+		result := getResult(input)
+		fmt.Println(result)
 	}
 }
