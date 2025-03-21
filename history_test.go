@@ -141,3 +141,15 @@ func TestLoadFromStrErr(t *testing.T) {
 		t.Errorf("Expected the error result %f to be loaded but got %f", errRes, loadRes)
 	}
 }
+
+func TestSavedInParser(t *testing.T) {
+	inputStr1 := "1+1"
+	inputStr2 := "1*1"
+	val1 := 2.0
+	getResult(inputStr1)
+	getResult(inputStr2)
+	loadRes := loadResFromString("0")
+	if val1 != loadRes {
+		t.Errorf("Expected the result %f to be loaded but got %f", val1, loadRes)
+	}
+}

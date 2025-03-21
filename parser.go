@@ -13,7 +13,7 @@ type Token struct {
 	priority int
 }
 
-var tokenMap map[string]Token = map[string]Token{
+var tokenMap map[string]Token = map[string]Token{ //TODO make into enums
 	"+": {ttype: "operation", value: "+", priority: 0},
 	"-": {ttype: "operation", value: "-", priority: 0}, //TODO unary -
 	"*": {ttype: "operation", value: "*", priority: 1},
@@ -128,5 +128,6 @@ func tokensToValue(tokens []Token, start int, end int, priority int) float64 {
 func getResult(input string) float64 {
 	tokens, length := tokenize(input)
 	value := tokensToValue(tokens, 0, length, 0)
+	saveCalc(input, value)
 	return value
 }
