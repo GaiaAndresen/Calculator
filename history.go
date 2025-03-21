@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"strconv"
+	"strings"
 )
 
 type Record struct {
@@ -11,10 +12,6 @@ type Record struct {
 }
 
 var records []Record = make([]Record, 0)
-
-func getTime() time.Time {
-	return time.Now()
-}
 
 func saveCalc(userinput string, res float64) {
 	records = append(records, Record{userinput: userinput, result: res})
@@ -30,11 +27,21 @@ func clearMemory() {
 	records = make([]Record, 0)
 }
 
-func load(num string) float64 {
-	return 1
+func load(index int) Record {
+	return records[index]
 }
 
-//Use last result
-//See all
-//Load mem number
-//Clear mem
+func loadResFromString(numStr string) float64 {
+	numStr = strings.ReplaceAll(numStr, " ", "")
+	numStr = strings.ReplaceAll(numStr, "(", "")
+	numStr = strings.ReplaceAll(numStr, ")", "")
+	if numStr == "" {
+		return load(len(records) - 1).result
+	}
+	number, err := strconv.ParseFloat(numStr, 64)
+	if err != nil {
+		fmt.Println("Error, expected an index, but got:", numStr)
+		return 0
+	}
+	return load(int(number)).result
+}
