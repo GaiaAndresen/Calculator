@@ -128,6 +128,5 @@ func tokensToValue(tokens []Token, start int, end int, priority int) float64 {
 func getResult(input string) float64 {
 	tokens, length := tokenize(input)
 	value := tokensToValue(tokens, 0, length, 0)
-	saveCalc(input, value)
 	return value
 }

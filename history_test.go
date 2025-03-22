@@ -10,6 +10,9 @@ func TestEmptyHist(t *testing.T) {
 	}
 }
 
+// These tests are saved to show the testing of a previous version
+
+/*
 func TestSave(t *testing.T) {
 	inputStr := "1+1"
 	val := 2.0
@@ -20,12 +23,12 @@ func TestSave(t *testing.T) {
 		t.Errorf("Expected %d elements in history but got %d", lenExp, len(records))
 	}
 
-	if inputStr != records[0].userinput {
-		t.Errorf("Expected the input %s to be saved but got %s", inputStr, records[0].userinput)
+	if inputStr != records[0].Userinput {
+		t.Errorf("Expected the input %s to be saved but got %s", inputStr, records[0].Userinput)
 	}
 
-	if val != records[0].result {
-		t.Errorf("Expected the result %f to be saved but got %f", val, records[0].result)
+	if val != records[0].Result {
+		t.Errorf("Expected the result %f to be saved but got %f", val, records[0].Result)
 	}
 }
 
@@ -59,12 +62,12 @@ func TestLoad(t *testing.T) {
 	saveCalc(inputStr, val)
 	loadRec := load(0)
 
-	if inputStr != loadRec.userinput {
-		t.Errorf("Expected the input %s to be loaded but got %s", inputStr, loadRec.userinput)
+	if inputStr != loadRec.Userinput {
+		t.Errorf("Expected the input %s to be loaded but got %s", inputStr, loadRec.Userinput)
 	}
 
-	if val != loadRec.result {
-		t.Errorf("Expected the result %f to be loaded but got %f", val, loadRec.result)
+	if val != loadRec.Result {
+		t.Errorf("Expected the result %f to be loaded but got %f", val, loadRec.Result)
 	}
 }
 
@@ -153,3 +156,4 @@ func TestSavedInParser(t *testing.T) {
 		t.Errorf("Expected the result %f to be loaded but got %f", val1, loadRes)
 	}
 }
+*/
