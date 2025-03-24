@@ -25,7 +25,7 @@ func saveCalc(userInput string, res float64, writer http.ResponseWriter, firesto
 	records = append(records, Record{Userinput: userInput, Result: res})
 	record := Record{Userinput: userInput, Result: res, Time: time.Now().Unix()}
 
-	_, _, err := firestoreClient.Collection("messages").Add(ctx, record)
+	_, _, err := firestoreClient.Collection("calculations").Add(ctx, record)
 	if err != nil {
 		log.Printf("Failed to add message: %v", err)
 		http.Error(writer, "Failed to store message", http.StatusInternalServerError)
@@ -35,7 +35,7 @@ func saveCalc(userInput string, res float64, writer http.ResponseWriter, firesto
 
 func getHistoryString(firestoreClient *firestore.Client, ctx context.Context) string {
 	// Query Firestore to get all records
-	iter := firestoreClient.Collection("messages").OrderBy("Time", firestore.Asc).Documents(ctx)
+	iter := firestoreClient.Collection("calculations").OrderBy("Time", firestore.Asc).Documents(ctx)
 	defer iter.Stop()
 
 	history := ""

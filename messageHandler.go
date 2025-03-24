@@ -1,16 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 )
 
 func handleGetRequest(writer http.ResponseWriter, request *http.Request, firestoreClient *firestore.Client) {
-
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
 		http.Error(writer, fmt.Sprintf("Error reading request body: %v", err), http.StatusBadRequest)
@@ -54,12 +55,58 @@ func handleGetRequest(writer http.ResponseWriter, request *http.Request, firesto
 	fmt.Fprintln(writer, returnMessage)
 }
 
+func handleDelRequest(writer http.ResponseWriter, ctx context.Context, client *firestore.Client) {
+	ref := client.Collection("calculations")
+	batchSize := 100
+	for {
+		// Get a batch of documents in the collection
+		iter := ref.Limit(batchSize).Documents(ctx)
+		numDeleted := 0
+
+		// Iterate through the documents and delete them
+		writeBatch := client.Batch()
+		for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				writer.WriteHeader(http.StatusNotFound)
+				fmt.Println("Error when iterating")
+				fmt.Fprintln(writer, "Could not delete history")
+				return
+			}
+
+			writeBatch.Delete(doc.Ref) // Use writeBatch.Delete
+			numDeleted++
+		}
+
+		// If there are no documents to delete, we're done
+		if numDeleted == 0 {
+			writer.WriteHeader(http.StatusOK)
+			fmt.Fprintln(writer, "History deleted")
+			return
+		}
+
+		// Commit the batch delete
+		_, err := writeBatch.Commit(ctx)
+		if err != nil {
+			writer.WriteHeader(http.StatusNotFound)
+			fmt.Println("Error when deleting element")
+			fmt.Fprintln(writer, "Could not delete history")
+			return
+		}
+	}
+}
+
 // Handle incoming messages
 func messageHandler(firestoreClient *firestore.Client) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		switch request.Method {
 		case http.MethodGet:
 			handleGetRequest(writer, request, firestoreClient)
+		case http.MethodDelete:
+			handleDelRequest(writer, request.Context(), firestoreClient)
 		default:
 			http.Error(writer, "Method not allowed", http.StatusMethodNotAllowed)
 		}

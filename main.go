@@ -41,7 +41,7 @@ func main() {
 	messageHandler := messageHandler(firestoreClient)
 
 	// Register the message handler
-	http.Handle("/messages", messageHandler)
+	http.Handle("/calculations", messageHandler)
 
 	// Start the server
 	fmt.Println("Calculator on")

@@ -1,7 +1,7 @@
 Get element from database 
 Postman
+readme with firebase json and Time index
 
 Low priority
--Add delete history
 -Fix unary minus
 -Add enums
