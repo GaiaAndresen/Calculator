@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/firestore"
+	"google.golang.org/api/iterator"
 )
 
 type Record struct {
@@ -58,10 +59,6 @@ func getHistoryString(firestoreClient *firestore.Client, ctx context.Context) st
 	return history
 }
 
-func clearMemory() {
-	records = make([]Record, 0)
-}
-
 func loadLatest(ctx context.Context, firestoreClient *firestore.Client) float64 {
 	query := firestoreClient.Collection("calculations").OrderBy("Time", firestore.Desc).Limit(1)
 
@@ -107,28 +104,46 @@ func load(ctx context.Context, firestoreClient *firestore.Client, index int) flo
 	}
 }
 
-/*
-func loadResFromString(numStr string) float64 {
-	numStr = strings.ReplaceAll(numStr, " ", "")
-	numStr = strings.ReplaceAll(numStr, "(", "")
-	numStr = strings.ReplaceAll(numStr, ")", "")
-	recordsAmount := len(records)
-	if numStr == "" {
-		if recordsAmount == 0 {
-			fmt.Println("No values in memory, insert 0")
-			return 0
+func deleteHistory(writer http.ResponseWriter, ctx context.Context, client *firestore.Client) {
+	ref := client.Collection("calculations")
+	batchSize := 100
+	for {
+		// Get a batch of documents in the collection
+		iter := ref.Limit(batchSize).Documents(ctx)
+		numDeleted := 0
+
+		// Iterate through the documents and delete them
+		writeBatch := client.Batch()
+		for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				writer.WriteHeader(http.StatusNotFound)
+				fmt.Println("Error when iterating")
+				fmt.Fprintln(writer, "Could not delete history")
+				return
+			}
+
+			writeBatch.Delete(doc.Ref) // Use writeBatch.Delete
+			numDeleted++
 		}
-		return load(recordsAmount - 1).Result
+
+		// If there are no documents to delete, we're done
+		if numDeleted == 0 {
+			writer.WriteHeader(http.StatusOK)
+			fmt.Fprintln(writer, "History deleted")
+			return
+		}
+
+		// Commit the batch delete
+		_, err := writeBatch.Commit(ctx)
+		if err != nil {
+			writer.WriteHeader(http.StatusNotFound)
+			fmt.Println("Error when deleting element")
+			fmt.Fprintln(writer, "Could not delete history")
+			return
+		}
 	}
-	number, err := strconv.Atoi(numStr)
-	if err != nil {
-		fmt.Println("Error, expected an index, but got:", numStr)
-		return 0
-	}
-	if number >= recordsAmount {
-		fmt.Printf("There are only %d elements in memory, (%d) is invalid", recordsAmount, number)
-		return 0
-	}
-	return load(int(number)).Result
 }
-*/
