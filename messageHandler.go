@@ -6,10 +6,22 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"cloud.google.com/go/firestore"
 	"google.golang.org/api/iterator"
 )
+
+func insertLoadInInput(userInput string, ctx context.Context, firestoreClient *firestore.Client) string {
+	inputSplit := strings.Split(userInput, "]")
+	if len(inputSplit) != 2 {
+		return "Error"
+	}
+	databaseIndex, _ := strconv.Atoi(inputSplit[0][1:])
+	loadValue := load(ctx, firestoreClient, databaseIndex)
+	loadValueStr := strconv.FormatFloat(loadValue, 'f', -1, 64)
+	return loadValueStr + inputSplit[1]
+}
 
 func handleGetRequest(writer http.ResponseWriter, request *http.Request, firestoreClient *firestore.Client) {
 	body, err := io.ReadAll(request.Body)
@@ -38,9 +50,17 @@ func handleGetRequest(writer http.ResponseWriter, request *http.Request, firesto
 			}
 		case firstChar == '+' || firstChar == '-' || firstChar == '*' || firstChar == '/' || firstChar == '^':
 			{
-				lastValue := strconv.FormatFloat(loadResFromString(""), 'f', -1, 64)
-				userInput = lastValue + userInput
+				lastValue := loadLatest(ctx, firestoreClient)
+				lastValueStr := strconv.FormatFloat(lastValue, 'f', -1, 64)
+				userInput = lastValueStr + userInput
 				result := getResult(userInput)
+				saveCalc(userInput, result, writer, firestoreClient, ctx)
+				returnMessage = strconv.FormatFloat(result, 'f', -1, 64)
+			}
+		case firstChar == '[':
+			{
+				loadedUserInput := insertLoadInInput(userInput, ctx, firestoreClient)
+				result := getResult(loadedUserInput)
 				saveCalc(userInput, result, writer, firestoreClient, ctx)
 				returnMessage = strconv.FormatFloat(result, 'f', -1, 64)
 			}

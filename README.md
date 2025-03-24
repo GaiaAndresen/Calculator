@@ -4,7 +4,11 @@
 
 The binary operations +, -, *, /, and ^ are supported as well as ( and ). To get the value of an expression using these a GET request is used. 
 
-GET is also used to get the history using the 'hist' or 'history' command
+GET is also used to get the history using the 'hist' or 'history' command.
+
+The previous result can be used by starting an expression with a binary operation. 
+
+Any of the previous results can be used as the first value in the expression by using [index], where index is the index showed when using the history command. 
 
 The history can be deleted using a DEL request.
 

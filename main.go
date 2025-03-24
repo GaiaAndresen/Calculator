@@ -69,12 +69,6 @@ func main() {
 					loadedValueExists = false
 					fmt.Println("History cleared")
 				}
-			case len(input) >= 4 && input[:4] == "load":
-				{
-					loadedValue = loadResFromString(input[4:])
-					loadedValueExists = true
-					fmt.Printf("Value %.2f loaded\n", loadedValue)
-				}
 			case len(input) >= 3 && input[:3] == "del":
 				{
 					loadedValueExists = false
@@ -95,10 +89,6 @@ func main() {
 						result := getResult(input)
 						fmt.Println(result)
 					} else {
-						lastValue := strconv.FormatFloat(loadResFromString(""), 'f', -1, 64)
-						input = lastValue + input
-						result := getResult(input)
-						fmt.Println(result)
 					}
 				}
 			default:

@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -63,14 +62,52 @@ func clearMemory() {
 	records = make([]Record, 0)
 }
 
-func loadLatest() {
-	//Limit(1)
+func loadLatest(ctx context.Context, firestoreClient *firestore.Client) float64 {
+	query := firestoreClient.Collection("calculations").OrderBy("Time", firestore.Desc).Limit(1)
+
+	iter := query.Documents(ctx)
+	defer iter.Stop()
+
+	doc, err := iter.Next()
+	if err != nil {
+		return 0
+	}
+	var record Record
+	if err := doc.DataTo(&record); err != nil {
+		return 0
+	}
+	return record.Result
+
 }
 
-func load(index int) Record {
-	return records[index]
+func load(ctx context.Context, firestoreClient *firestore.Client, index int) float64 {
+	query := firestoreClient.Collection("calculations").OrderBy("Time", firestore.Asc).Limit(index + 1)
+
+	iter := query.Documents(ctx)
+	defer iter.Stop()
+
+	i := 0
+	for {
+		doc, err := iter.Next()
+		if err == io.EOF || doc == nil {
+			return 0
+		}
+		if err != nil {
+			return 0
+		}
+
+		if i == index {
+			var record Record
+			if err := doc.DataTo(&record); err != nil {
+				return 0
+			}
+			return record.Result
+		}
+		i++
+	}
 }
 
+/*
 func loadResFromString(numStr string) float64 {
 	numStr = strings.ReplaceAll(numStr, " ", "")
 	numStr = strings.ReplaceAll(numStr, "(", "")
@@ -94,3 +131,4 @@ func loadResFromString(numStr string) float64 {
 	}
 	return load(int(number)).Result
 }
+*/

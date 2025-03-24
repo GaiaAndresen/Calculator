@@ -1,7 +1,4 @@
-Get element from database 
-Postman
-readme with firebase json and Time index
-
 Low priority
 -Fix unary minus
 -Add enums
+-Postman eksport
