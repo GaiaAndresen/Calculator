@@ -1,4 +1,3 @@
-Low priority
--Fix unary minus
+For real production
+-Error catching
 -Add enums
--Postman eksport

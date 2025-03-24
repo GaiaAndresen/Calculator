@@ -2,7 +2,7 @@
 
 ### Functionality
 
-The binary operations +, -, *, /, and ^ are supported as well as ( and ). To get the value of an expression using these a GET request is used. 
+The binary operations +, -, *, /, and ^ are supported as well as unary minus, (, and ). To get the value of an expression using these a GET request is used. 
 
 GET is also used to get the history using the 'hist' or 'history' command.
 

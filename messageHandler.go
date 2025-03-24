@@ -41,7 +41,7 @@ func handleGetRequest(writer http.ResponseWriter, request *http.Request, firesto
 				fmt.Fprintln(writer, getHistoryString(firestoreClient, ctx))
 				return
 			}
-		case (firstChar >= '0' && firstChar <= '9') || firstChar == '(' || firstChar == '-':
+		case (firstChar >= '0' && firstChar <= '9') || firstChar == '(':
 			{
 				result := getResult(userInput)
 				saveCalc(userInput, result, writer, firestoreClient, ctx)

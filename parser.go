@@ -13,30 +13,60 @@ type Token struct {
 	priority int
 }
 
-var tokenMap map[string]Token = map[string]Token{ //TODO make into enums
-	"+": {ttype: "operation", value: "+", priority: 0},
-	"-": {ttype: "operation", value: "-", priority: 0}, //TODO unary -
-	"*": {ttype: "operation", value: "*", priority: 1},
-	"/": {ttype: "operation", value: "/", priority: 1},
-	"^": {ttype: "operation", value: "^", priority: 2},
-	"(": {ttype: "parenthesis", value: "("},
-	")": {ttype: "parenthesis", value: ")"},
+var tokenMap map[byte]Token = map[byte]Token{ //TODO make into enums
+	'+': {ttype: "operation", value: "+", priority: 0},
+	'-': {ttype: "operation", value: "-", priority: 0},
+	'*': {ttype: "operation", value: "*", priority: 1},
+	'/': {ttype: "operation", value: "/", priority: 1},
+	'^': {ttype: "operation", value: "^", priority: 2},
+	'(': {ttype: "parenthesis", value: "("},
+	')': {ttype: "parenthesis", value: ")"},
+}
+
+func isUnaryMinus(char byte, prevToken Token) bool {
+	if char != '-' {
+		return false
+	}
+	if prevToken.ttype == "operation" {
+		return true
+	}
+	if prevToken.value == "(" {
+		return true
+	}
+	return false
 }
 
 func tokenize(input string) ([]Token, int) {
 	input = strings.ReplaceAll(input, " ", "")
 	length := 0
-	tokens := make([]Token, len(input))
+	tokens := []Token{}
 	numberStartIndex := -1
 	for i := 0; i < len(input); i++ {
-		if token, tokenExists := tokenMap[string(input[i])]; tokenExists {
+		char := input[i]
+		if len(tokens) > 0 && numberStartIndex == -1 && isUnaryMinus(char, tokens[len(tokens)-1]) {
+			switch tokens[len(tokens)-1].value {
+			case "/", "^":
+				{
+					return nil, 0
+				}
+			default:
+				{
+					minusOne := Token{ttype: "number", value: "-1"}
+					mult := tokenMap['*']
+					tokens = append(tokens, minusOne)
+					tokens = append(tokens, mult)
+					length += 2
+				}
+			}
+
+		} else if token, tokenExists := tokenMap[char]; tokenExists {
 			if numberStartIndex != -1 {
 				numberToken := Token{ttype: "number", value: string(input[numberStartIndex:i])}
-				tokens[length] = numberToken
+				tokens = append(tokens, numberToken)
 				length++
 				numberStartIndex = -1
 			}
-			tokens[length] = token
+			tokens = append(tokens, token)
 			length++
 		} else if numberStartIndex == -1 {
 			numberStartIndex = i
@@ -44,10 +74,10 @@ func tokenize(input string) ([]Token, int) {
 	}
 	if numberStartIndex != -1 {
 		numberToken := Token{ttype: "number", value: string(input[numberStartIndex:])}
-		tokens[length] = numberToken
+		tokens = append(tokens, numberToken)
 		length++
 	}
-	return tokens[:length], length
+	return tokens, length
 }
 
 func getResultOfTokenAndValues(leftvalue float64, rightvalue float64, token Token) float64 {
@@ -127,6 +157,10 @@ func tokensToValue(tokens []Token, start int, end int, priority int) float64 {
 
 func getResult(input string) float64 {
 	tokens, length := tokenize(input)
+	if length == 0 {
+		return 0
+	}
+	fmt.Println(tokens)
 	value := tokensToValue(tokens, 0, length, 0)
 	return value
 }
